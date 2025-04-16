@@ -45,10 +45,10 @@ struct DSPDemoParameterBase    : public ChangeBroadcaster
 struct SliderParameter final : public DSPDemoParameterBase
 {
     SliderParameter (Range<double> range, double skew, double initialValue,
-                     const String& labelName, const String& suffix = {})
+                     const String& labelName, const String& suffix = {}, double newInterval = 0.01)
         : DSPDemoParameterBase (labelName)
     {
-        slider.setRange (range.getStart(), range.getEnd(), 0.01);
+        slider.setRange (range.getStart(), range.getEnd(), newInterval);
         slider.setSkewFactor (skew);
         slider.setValue (initialValue);
 
@@ -325,7 +325,11 @@ struct DSPDemo final : public AudioSource,
     void changeListenerCallback (ChangeBroadcaster*) override
     {
         ScopedLock audioLock (audioCallbackLock);
-        static_cast<DemoType&> (this->processor).updateParameters();
+        auto& processor = static_cast<DemoType&> (this->processor);
+        processor.updateParameters();
+        if (resampleSource) {
+            resampleSource->setResamplingRatio (processor.tempoParam.getCurrentValue());
+        }
     }
 
     CriticalSection audioCallbackLock;

@@ -7,7 +7,7 @@
 */
 
 #include <JuceHeader.h>
-#include "ConvolutionDemo.h"
+#include "GainDemo.h"
 
 class Application    : public juce::JUCEApplication
 {
@@ -15,12 +15,12 @@ public:
     //==============================================================================
     Application() = default;
 
-    const juce::String getApplicationName() override       { return "ConvolutionDemo"; }
+    const juce::String getApplicationName() override       { return "GainDemo"; }
     const juce::String getApplicationVersion() override    { return "1.0.0"; }
 
     void initialise (const juce::String&) override
     {
-        mainWindow.reset (new MainWindow ("ConvolutionDemo", new ConvolutionDemo, *this));
+        mainWindow.reset (new MainWindow ("GainDemo", new GainDemo, *this));
     }
 
     void shutdown() override                         { mainWindow = nullptr; }
