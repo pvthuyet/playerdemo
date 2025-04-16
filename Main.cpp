@@ -7,7 +7,7 @@
 */
 
 #include <JuceHeader.h>
-#include "GainDemo.h"
+#include "IIRFilterDemo.h"
 
 class Application    : public juce::JUCEApplication
 {
@@ -15,12 +15,12 @@ public:
     //==============================================================================
     Application() = default;
 
-    const juce::String getApplicationName() override       { return "GainDemo"; }
+    const juce::String getApplicationName() override       { return "IIRFilterDemo"; }
     const juce::String getApplicationVersion() override    { return "1.0.0"; }
 
     void initialise (const juce::String&) override
     {
-        mainWindow.reset (new MainWindow ("GainDemo", new GainDemo, *this));
+        mainWindow.reset (new MainWindow ("IIRFilterDemo", new IIRFilterDemo, *this));
     }
 
     void shutdown() override                         { mainWindow = nullptr; }

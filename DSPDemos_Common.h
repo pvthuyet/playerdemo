@@ -290,7 +290,6 @@ struct DSPDemo final : public AudioSource,
     {
         inputSource->prepareToPlay (blockSize, sampleRate);
         resampleSource->prepareToPlay (blockSize, sampleRate);
-        //resampleSource->setResamplingRatio(2.0f);
         this->prepare ({ sampleRate, (uint32) blockSize, 2 });
     }
 
