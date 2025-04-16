@@ -278,8 +278,9 @@ struct DSPDemo final : public AudioSource,
                        public ProcessorWrapper<DemoType>,
                        private ChangeListener
 {
-    DSPDemo (AudioSource& input)
+    DSPDemo (AudioSource& input, juce::ResamplingAudioSource& inputResampling)
         : inputSource (&input)
+        , resampleSource (&inputResampling)
     {
         for (auto* p : getParameters())
             p->addChangeListener (this);
@@ -288,12 +289,15 @@ struct DSPDemo final : public AudioSource,
     void prepareToPlay (int blockSize, double sampleRate) override
     {
         inputSource->prepareToPlay (blockSize, sampleRate);
+        resampleSource->prepareToPlay (blockSize, sampleRate);
+        //resampleSource->setResamplingRatio(2.0f);
         this->prepare ({ sampleRate, (uint32) blockSize, 2 });
     }
 
     void releaseResources() override
     {
         inputSource->releaseResources();
+        resampleSource->releaseResources();
     }
 
     void getNextAudioBlock (const AudioSourceChannelInfo& bufferToFill) override
@@ -304,7 +308,7 @@ struct DSPDemo final : public AudioSource,
             return;
         }
 
-        inputSource->getNextAudioBlock (bufferToFill);
+        resampleSource->getNextAudioBlock (bufferToFill);
 
         AudioBlock<float> block (*bufferToFill.buffer,
                                  (size_t) bufferToFill.startSample);
@@ -327,6 +331,7 @@ struct DSPDemo final : public AudioSource,
     CriticalSection audioCallbackLock;
 
     AudioSource* inputSource;
+    juce::ResamplingAudioSource* resampleSource = nullptr;
 };
 
 //==============================================================================
@@ -446,6 +451,7 @@ public:
         {
             transportSource.reset (new AudioTransportSource());
             transportSource->addChangeListener (this);
+            resampleSource.reset (new ResamplingAudioSource (transportSource.get(), false, 2));
 
             if (readerSource != nullptr)
             {
@@ -462,7 +468,7 @@ public:
         currentDemo.reset();
 
         if (currentDemo.get() == nullptr)
-            currentDemo.reset (new DSPDemo<DemoType> (*transportSource));
+            currentDemo.reset (new DSPDemo<DemoType> (*transportSource, *resampleSource));
 
         audioSourcePlayer.setSource (currentDemo.get());
 
@@ -666,6 +672,7 @@ private:
     std::unique_ptr<AudioFormatReader> reader;
     std::unique_ptr<AudioFormatReaderSource> readerSource;
     std::unique_ptr<AudioTransportSource> transportSource;
+    std::unique_ptr<juce::ResamplingAudioSource> resampleSource;
     std::unique_ptr<DSPDemo<DemoType>> currentDemo;
 
     AudioSourcePlayer audioSourcePlayer;
