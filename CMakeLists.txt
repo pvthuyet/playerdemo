@@ -25,7 +25,8 @@ project(PLAYER_DEMO VERSION 0.0.1)
 
 # find_package(JUCE CONFIG REQUIRED)        # If you've installed JUCE to your system
 # or
-add_subdirectory(JUCE)                    # If you've put JUCE in a subdirectory called JUCE
+add_subdirectory(libs/JUCE)                    # If you've put JUCE in a subdirectory called JUCE
+add_subdirectory(libs/chowdsp_utils)
 
 # `juce_add_console_app` adds an executable target with the name passed as the first argument
 # (PlayerDemo here). This target is a normal CMake target, but has a lot of extra properties
@@ -50,6 +51,7 @@ juce_generate_juce_header(PlayerDemo)
 
 target_sources(PlayerDemo
     PRIVATE
+        PitchShiftWrapper.cpp
         Main.cpp)
 
 # `target_compile_definitions` adds some preprocessor definitions to our target. In a Projucer
@@ -88,6 +90,7 @@ target_link_libraries(PlayerDemo
         juce::juce_dsp
         juce::juce_audio_devices
         juce::juce_audio_utils
+        chowdsp::chowdsp_dsp_utils
     PUBLIC
         juce::juce_recommended_config_flags
         juce::juce_recommended_warning_flags)

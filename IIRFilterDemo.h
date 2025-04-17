@@ -54,6 +54,8 @@
 
 #include "DemoUtilities.h"
 #include "DSPDemos_Common.h"
+#include "PitchShiftWrapper.h"
+#include <chowdsp_dsp_utils/chowdsp_dsp_utils.h>
 
 using namespace dsp;
 
@@ -63,29 +65,34 @@ struct IIRFilterDemoDSP
     void prepare (const ProcessSpec& spec)
     {
         sampleRate = spec.sampleRate;
+        shifter.prepare (spec);
 
-        iir.state = IIR::Coefficients<float>::makeLowPass (sampleRate, 440.0);
-        iir.prepare (spec);
+        //iir.state = IIR::Coefficients<float>::makeLowPass (sampleRate, 440.0);
+        //iir.prepare (spec);
     }
 
     void process (const ProcessContextReplacing<float>& context)
     {
-        iir.process (context);
+        //iir.process (context);
+        shifter.process (context);
     }
 
     void reset()
     {
-        iir.reset();
+        //iir.reset();
+        shifter.reset();
     }
 
     void updateParameters()
     {
         if (! approximatelyEqual (sampleRate, 0.0))
         {
-            auto cutoff = static_cast<float> (cutoffParam.getCurrentValue());
+            shifter.setShiftSemitones (pitchParam.getCurrentValue());
+
+            //auto cutoff = static_cast<float> (cutoffParam.getCurrentValue());
             //auto qVal   = static_cast<float> (qParam.getCurrentValue());
-            auto qVal = 0.71f;
-            *iir.state = IIR::ArrayCoefficients<float>::makeLowPass  (sampleRate, cutoff, qVal);
+            //auto qVal = 0.71f;
+            //*iir.state = IIR::ArrayCoefficients<float>::makeLowPass  (sampleRate, cutoff, qVal);
 
             // switch (typeParam.getCurrentSelectedID())
             // {
@@ -98,14 +105,17 @@ struct IIRFilterDemoDSP
     }
 
     //==============================================================================
-    ProcessorDuplicator<IIR::Filter<float>, IIR::Coefficients<float>> iir;
+    //ProcessorDuplicator<IIR::Filter<float>, IIR::Coefficients<float>> iir;
+    //PitchShiftWrapper pitchShifter;
+    chowdsp::PitchShifter<float, chowdsp::DelayLineInterpolationTypes::Lagrange3rd> shifter { 4096, 256 };
 
     //ChoiceParameter typeParam { { "Low-pass", "High-pass", "Band-pass" }, 1, "Type" };
-    SliderParameter cutoffParam { { 20.0, 20000.0 }, 0.5, 440.0f, "Cutoff", "Hz" };
+    //SliderParameter cutoffParam { { 20.0, 20000.0 }, 0.5, 440.0f, "Cutoff", "Hz" };
     //SliderParameter qParam { { 0.3, 20.0 }, 0.5, 1.0 / std::sqrt (2.0), "Q" };
+    SliderParameter pitchParam { { 0.0, 12.0 }, 1.0, 0.0f, "Pitch", "", 1.0f };
     SliderParameter tempoParam { { 0.25, 2.0 }, 1.0, 1.0, "Speed", "x", 0.25 };
 
-    std::vector<DSPDemoParameterBase*> parameters { &cutoffParam, &tempoParam };
+    std::vector<DSPDemoParameterBase*> parameters { &pitchParam, &tempoParam };
     double sampleRate = 0.0;
 };
 
