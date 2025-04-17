@@ -15,12 +15,12 @@ public:
     //==============================================================================
     Application() = default;
 
-    const juce::String getApplicationName() override       { return "IIRFilterDemo"; }
+    const juce::String getApplicationName() override       { return "Player Demo"; }
     const juce::String getApplicationVersion() override    { return "1.0.0"; }
 
     void initialise (const juce::String&) override
     {
-        mainWindow.reset (new MainWindow ("IIRFilterDemo", new IIRFilterDemo, *this));
+        mainWindow.reset (new MainWindow ("PlayerDemo", new IIRFilterDemo, *this));
     }
 
     void shutdown() override                         { mainWindow = nullptr; }
